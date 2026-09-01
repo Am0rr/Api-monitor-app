@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AM.API/AM.API.csproj" />
+  <Project Path="AM.BLL/AM.BLL.csproj" />
+  <Project Path="AM.DAL/AM.DAL.csproj" />
+</Solution>
