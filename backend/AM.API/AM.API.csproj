@@ -9,7 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AM.DAL\AM.DAL.csproj" />
+    <ProjectReference Include="..\AM.BLL\AM.BLL.csproj" />
   </ItemGroup>
 
 </Project>

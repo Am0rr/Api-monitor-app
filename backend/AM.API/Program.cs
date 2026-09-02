@@ -1,41 +1,32 @@
+using DotNetEnv;
+using AM.DAL;
+
+Env.TraversePath().Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Configuration.AddEnvironmentVariables();
+
+var connectionString = $"Server={Env.GetString("DB_HOST", "localhost")},{Env.GetString("DB_PORT", "1433")};" +
+                       $"Database={Env.GetString("DB_NAME", "ApiMonitorDb")};" +
+                       $"User Id=sa;" +
+                       $"Password={Env.GetString("MSSQL_SA_PASSWORD")};" +
+                       $"Encrypt=False;" +
+                       $"TrustServerCertificate=True;";
+
+builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!string.IsNullOrEmpty(connectionString))
 {
-    app.MapOpenApi();
+    DatabaseInitializer.EnsureDatabaseSetup(connectionString);
 }
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    
+app.MapControllers();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
