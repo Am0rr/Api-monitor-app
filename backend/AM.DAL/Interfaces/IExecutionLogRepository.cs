@@ -4,7 +4,7 @@ namespace AM.DAL.Interfaces;
 
 public interface IExecutionLogRepository
 {
-    Task AddAsync(ExecutionLog log);
-    Task<ExecutionLog?> GetByIdAsync(long executionLogId);
-    Task<IEnumerable<ExecutionLog>> GetByEndpointIdAsync(Guid endpointId, int count = 100);
+    Task AddAsync(ExecutionLog log, CancellationToken cancellationToken = default);
+    Task<ExecutionLog?> GetByIdAsync(long executionLogId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ExecutionLog>> GetByEndpointIdAsync(Guid endpointId, CancellationToken cancellationToken, int count = 100);
 }

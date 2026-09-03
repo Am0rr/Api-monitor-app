@@ -10,21 +10,22 @@ namespace AM.DAL.Repositories;
 public class EndpointRepository(IConfiguration configuration) : IEndpointRepository
 {
     private readonly string _connectionString = configuration.GetConnectionString("DefaultConnection")
-                                                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is messing");
+                                                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing");
 
     private IDbConnection CreateConnection() => new SqlConnection(_connectionString);
     
-    public async Task AddAsync(Endpoint endpoint)
+    public async Task AddAsync(Endpoint endpoint, CancellationToken cancellationToken)
     {
         const string sql = @"
             INSERT INTO Endpoints (Id, Name, Url, CheckIntervalSeconds, IsActive, CreatedAt)
             VALUES (@Id, @Name, @Url, @CheckIntervalSeconds, @IsActive, @CreatedAt);";
 
         using var connection = CreateConnection();
-        await connection.ExecuteAsync(sql, endpoint);
+        var command = new CommandDefinition(sql, endpoint, cancellationToken: cancellationToken);
+        await connection.ExecuteAsync(command);
     }
 
-    public async Task UpdateAsync(Endpoint endpoint)
+    public async Task UpdateAsync(Endpoint endpoint, CancellationToken cancellationToken)
     {
         const string sql = @"
             UPDATE Endpoints
@@ -35,20 +36,22 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
             WHERE Id = @Id;";
 
         using var connection = CreateConnection();
-        await connection.ExecuteAsync(sql, endpoint);
+        var command = new CommandDefinition(sql, endpoint, cancellationToken: cancellationToken);
+        await connection.ExecuteAsync(command);
     }
 
-    public async Task DeleteAsync(Guid endpointId)
+    public async Task DeleteAsync(Guid endpointId, CancellationToken cancellationToken)
     {
         const string sql = @"
                 DELETE FROM Endpoints
                 WHERE Id = @Id;";
         
         using var connection = CreateConnection();
-        await connection.ExecuteAsync(sql, new {Id = endpointId});
+        var command = new CommandDefinition(sql, new {Id = endpointId}, cancellationToken: cancellationToken);
+        await connection.ExecuteAsync(command);
     }
 
-    public async Task<Endpoint?> GetByIdAsync(Guid endpointId)
+    public async Task<Endpoint?> GetByIdAsync(Guid endpointId, CancellationToken cancellationToken)
     {
         const string sql = @"
                 SELECT Id, Name, Url, CheckIntervalSeconds, IsActive, CreatedAt
@@ -56,10 +59,11 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
                 WHERE Id = @Id;";
         
         using var connection = CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Endpoint>(sql, new {Id = endpointId});
+        var command = new CommandDefinition(sql, new {Id = endpointId}, cancellationToken: cancellationToken);
+        return await connection.QuerySingleOrDefaultAsync<Endpoint>(command);
     }
 
-    public async Task<IEnumerable<Endpoint>> GetAllAsync()
+    public async Task<IEnumerable<Endpoint>> GetAllAsync(CancellationToken cancellationToken)
     {
         const string sql = @"
                 SELECT Id, Name, Url, CheckIntervalSeconds, IsActive, CreatedAt
@@ -67,10 +71,11 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
                 ORDER BY CreatedAt DESC;";
 
         using var connection = CreateConnection();
-        return await connection.QueryAsync<Endpoint>(sql);
+        var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
+        return await connection.QueryAsync<Endpoint>(command);
     }
 
-    public async Task<IEnumerable<Endpoint>> GetActiveAsync()
+    public async Task<IEnumerable<Endpoint>> GetActiveAsync(CancellationToken cancellationToken)
     {
         const string sql = @"
                 SELECT Id, Name, Url, CheckIntervalSeconds, IsActive, CreatedAt
@@ -79,6 +84,7 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
                 ORDER BY CreatedAt DESC ;";
         
         using var connection = CreateConnection();
-        return await connection.QueryAsync<Endpoint>(sql);
+        var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
+        return await connection.QueryAsync<Endpoint>(command);
     }
 }

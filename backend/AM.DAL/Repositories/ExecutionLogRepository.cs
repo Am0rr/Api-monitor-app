@@ -15,17 +15,18 @@ public class ExecutionLogRepository(IConfiguration configuration) : IExecutionLo
 
     private IDbConnection CreateConnection() => new SqlConnection(_connectionString);
 
-    public async Task AddAsync(ExecutionLog log)
+    public async Task AddAsync(ExecutionLog log, CancellationToken cancellationToken)
     {
         const string sql = @"
                 INSERT INTO ExecutionLogs (EndpointId, StatusCode, ResponseTimeMs, IsSuccess, ErrorMessage, CheckedAt)
                 VALUES (@EndpointId, @StatusCode, @ResponseTimeMs, @IsSuccess, @ErrorMessage, @CheckedAt);";
 
         using var connection = CreateConnection();
-        await connection.ExecuteAsync(sql, log);
+        var command = new CommandDefinition(sql, log, cancellationToken: cancellationToken);
+        await connection.ExecuteAsync(command);
     }
 
-    public async Task<ExecutionLog?> GetByIdAsync(long executionLogId)
+    public async Task<ExecutionLog?> GetByIdAsync(long executionLogId, CancellationToken cancellationToken)
     {
         const string sql = @"
                 SELECT Id, EndpointId, StatusCode, ResponseTimeMs, IsSuccess, ErrorMessage, CheckedAt
@@ -33,10 +34,11 @@ public class ExecutionLogRepository(IConfiguration configuration) : IExecutionLo
                 WHERE Id = @Id;";
 
         using var connection = CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<ExecutionLog>(sql, new { Id = executionLogId });
+        var command = new CommandDefinition(sql, new { Id = executionLogId }, cancellationToken: cancellationToken);
+        return await connection.QuerySingleOrDefaultAsync<ExecutionLog>(command);
     }
 
-    public async Task<IEnumerable<ExecutionLog>> GetByEndpointIdAsync(Guid endpointId, int count = 100)
+    public async Task<IEnumerable<ExecutionLog>> GetByEndpointIdAsync(Guid endpointId, CancellationToken cancellationToken, int count = 100)
     {
         const string sql = @"
             SELECT Top(@Count) Id, EndpointId, StatusCode, ResponseTimeMs, IsSuccess, ErrorMessage, CheckedAt
@@ -45,6 +47,7 @@ public class ExecutionLogRepository(IConfiguration configuration) : IExecutionLo
             ORDER BY CheckedAt DESC;";
 
         using var connection = CreateConnection();
-        return await connection.QueryAsync<ExecutionLog>(sql, new {EndpointId = endpointId, Count = count});
+        var command = new CommandDefinition(sql, new {EndpointId = endpointId, Count = count}, cancellationToken: cancellationToken);
+        return await connection.QueryAsync<ExecutionLog>(command);
     }
 }
