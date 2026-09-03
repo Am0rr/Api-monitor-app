@@ -40,7 +40,7 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
         await connection.ExecuteAsync(command);
     }
 
-    public async Task DeleteAsync(Guid endpointId, CancellationToken cancellationToken)
+    public async Task<bool> DeleteAsync(Guid endpointId, CancellationToken cancellationToken)
     {
         const string sql = @"
                 DELETE FROM Endpoints
@@ -48,10 +48,11 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
         
         using var connection = CreateConnection();
         var command = new CommandDefinition(sql, new {Id = endpointId}, cancellationToken: cancellationToken);
-        await connection.ExecuteAsync(command);
+        int rowsAffected = await connection.ExecuteAsync(command);
+        return rowsAffected > 0;
     }
 
-    public async Task<Endpoint?> GetByIdAsync(Guid endpointId, CancellationToken cancellationToken)
+    public async Task<Endpoint> GetByIdAsync(Guid endpointId, CancellationToken cancellationToken)
     {
         const string sql = @"
                 SELECT Id, Name, Url, CheckIntervalSeconds, IsActive, CreatedAt
@@ -60,7 +61,7 @@ public class EndpointRepository(IConfiguration configuration) : IEndpointReposit
         
         using var connection = CreateConnection();
         var command = new CommandDefinition(sql, new {Id = endpointId}, cancellationToken: cancellationToken);
-        return await connection.QuerySingleOrDefaultAsync<Endpoint>(command);
+        return await connection.QuerySingleAsync<Endpoint>(command);
     }
 
     public async Task<IEnumerable<Endpoint>> GetAllAsync(CancellationToken cancellationToken)

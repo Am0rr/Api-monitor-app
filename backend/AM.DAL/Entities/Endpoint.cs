@@ -20,4 +20,12 @@ public class Endpoint
         CheckIntervalSeconds = checkIntervalSeconds;
         IsActive = isActive;
     }
+
+    public void Update(string newName, string newUrl, int newCheckIntervalSeconds, bool newIsActive)
+    {
+        Name = newName;
+        Url = newUrl;
+        CheckIntervalSeconds = newCheckIntervalSeconds;
+        IsActive = newIsActive;
+    }
 }
