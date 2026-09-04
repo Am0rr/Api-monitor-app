@@ -1,3 +1,4 @@
+using AM.API.Middleware;
 using DotNetEnv;
 using AM.DAL;
 using AM.BLL;
@@ -22,6 +23,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionHandler>();
 
 if (!string.IsNullOrEmpty(connectionString))
 {
