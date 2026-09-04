@@ -26,7 +26,7 @@ public class ExecutionLogRepository(IConfiguration configuration) : IExecutionLo
         await connection.ExecuteAsync(command);
     }
 
-    public async Task<ExecutionLog?> GetByIdAsync(long executionLogId, CancellationToken cancellationToken)
+    public async Task<ExecutionLog> GetByIdAsync(long executionLogId, CancellationToken cancellationToken)
     {
         const string sql = @"
                 SELECT Id, EndpointId, StatusCode, ResponseTimeMs, IsSuccess, ErrorMessage, CheckedAt
@@ -35,7 +35,7 @@ public class ExecutionLogRepository(IConfiguration configuration) : IExecutionLo
 
         using var connection = CreateConnection();
         var command = new CommandDefinition(sql, new { Id = executionLogId }, cancellationToken: cancellationToken);
-        return await connection.QuerySingleOrDefaultAsync<ExecutionLog>(command);
+        return await connection.QuerySingleAsync(command);
     }
 
     public async Task<IEnumerable<ExecutionLog>> GetByEndpointIdAsync(Guid endpointId, CancellationToken cancellationToken, int count = 100)
