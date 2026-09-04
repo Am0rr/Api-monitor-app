@@ -6,7 +6,7 @@ namespace AM.BLL;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddBusinessLogicLayer(IServiceCollection services)
+    public static IServiceCollection AddBusinessLogicLayer(this IServiceCollection services)
     {
         services.AddScoped<IEndpointService, EndpointService>();
         services.AddScoped<IExecutionLogService, ExecutionLogService>();

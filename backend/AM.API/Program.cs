@@ -1,5 +1,6 @@
 using DotNetEnv;
 using AM.DAL;
+using AM.BLL;
 
 Env.TraversePath().Load();
 
@@ -15,7 +16,8 @@ var connectionString = $"Server={Env.GetString("DB_HOST", "localhost")},{Env.Get
 builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddDataAccessLayer();  
+builder.Services.AddDataAccessLayer();
+builder.Services.AddBusinessLogicLayer();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
